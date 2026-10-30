@@ -138,8 +138,14 @@ dsep_table <- sem_summary$dTable
 dsep_table
 
 # 八、提取 Fisher's C --------------------------------------------------------
-fisher_c <- sem_summary$CStat
+# 注意：用专门的 fisherC() 提取，不要写 sem_summary$CStat。
+# summary 对象里的元素名是 Cstat（小写 s），写错大小写时 R 不会报错，
+# 而是悄悄返回 NULL，导出的结果文件会是空的。
+fisher_c <- fisherC(sem_model)
 fisher_c
+
+# 运行后确认确实提取到了结果，而不是 NULL
+stopifnot(!is.null(fisher_c), nrow(fisher_c) == 1)
 
 # 九、提取标准化路径系数 -----------------------------------------------------
 path_coefficients <- coefs(

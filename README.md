@@ -121,25 +121,44 @@ Mineral N
 
 ```text
 r-code-cn-blogger/
-├── SKILL.md
+├── SKILL.md                       # 主文件：所有任务都适用的规矩（约 650 行）
+├── references/                    # 按需加载的参考文件，遇到具体任务才读
+│   ├── data-and-script.md         #   包管理、排版、读数据、检查、转换、缺失值、输出、版本变化
+│   ├── ecology-stats.md           #   排序分析、PERMANOVA、Mantel、方差分解、随机森林、SEM 等
+│   ├── plotting.md                #   ggplot2（含 4.x 写法变化）、保存、显著性标记
+│   ├── troubleshooting.md         #   报错排查
+│   ├── examples.md                #   合格/不合格代码对照、RDA 完整模板
+│   └── style-sources.md           #   11 个公众号的风格画像：吸收了什么、避开了什么
+├── examples/
+│   └── piecewise_sem_example.R    # 可直接运行的 piecewise SEM 完整示例
+├── CHANGELOG.md
 ├── README.md
-├── LICENSE
-├── references_source_profiles.md
-└── examples/
-    └── piecewise_sem_example.R
+└── LICENSE
 ```
 
-其中：
+v2 把 2000 多行规则全部放在一个 `SKILL.md` 里，每次调用都要整份读入。v3 按当前 Agent Skills 的做法拆成"主文件 + 按需加载的参考文件"：主文件只放通用规矩，做 RDA 才读排序分析那一份，画图才读绘图那一份，省 token，也更不容易顾此失彼。
 
-- `SKILL.md`：Skill 主文件，可直接用于安装或继续迭代
-- `references_source_profiles.md`：风格来源与设计说明
-- `examples/`：完整科研分析示例
+## 安装
+
+Claude Code：
+
+```bash
+git clone https://github.com/Anima720/r-code-cn-blogger.git ~/.claude/skills/r-code-cn-blogger
+```
+
+Codex：
+
+```bash
+git clone https://github.com/Anima720/r-code-cn-blogger.git ~/.codex/skills/r-code-cn-blogger
+```
+
+其他支持 Agent Skills 的工具，把整个文件夹放进对应的 skills 目录即可。`SKILL.md` 开头的 `name` 和 `description` 是标准字段。
 
 ## 风格来源
 
-这个 Skill 不逐字模仿任何公众号作者，而是提炼中文生态学和生物统计类科研教程中反复出现、对代码质量真正有帮助的共同写法。
+这个 Skill 不逐字模仿任何公众号作者，而是提炼中文生态学、生物统计和科研绘图类教程中反复出现、对代码质量真正有帮助的共同写法，取其精华、去其糟粕。
 
-当前重点参考的内容风格包括：
+参考的公众号：
 
 - 生态R学社
 - 清同趣科研
@@ -148,8 +167,13 @@ r-code-cn-blogger/
 - R语言生态小白
 - 藻类生态学与R分析作图
 - 植物功能生态
+- 二傻统计（v3.0 新增）
+- 红皇后学术（v3.0 新增）
+- 小田的生信随笔（v3.0 新增）
 
-重点吸收的是方法落地、矩阵意识、参数解释、统计前提、结果怎么看、易错点提醒和论文复现导向，而不是复制任何作者独有口吻。
+**关于证据的说明**：v3.0 通过搜狗微信搜索重新检索了这些账号，但微信原文无法批量读取，这一轮只看到了推文标题和摘要，没有读到正文，也无法核实发布日期。另一个计划新增的"地上地下生态学"没有检索到，暂未纳入。所以各账号画像写的是写法倾向，并为每个号标了证据强度；所有统计规则都以统计学本身为依据。欢迎提供推文链接帮助完善。
+
+重点吸收的是方法落地、矩阵意识、参数解释、统计前提、结果怎么看、易错点提醒和论文复现导向；明确不学的是标题党、"一键出神图"、不解释就删 NA 或标准化、P 值不显著就换方法、付费墙式残缺代码。每个账号的画像见 [`references/style-sources.md`](references/style-sources.md)。
 
 ## 推荐的使用方式
 
@@ -176,6 +200,16 @@ r-code-cn-blogger/
 ```
 
 Skill 会把这种要求视为需要保护的“分析协议”。
+
+## v3.0 有什么不同
+
+- **结构**：拆成主文件 + 6 个按需加载的参考文件，适配当前各家模型的 Agent Skills 机制。
+- **面向新一代模型的约束**：能运行就真的运行，没运行要如实说；不凭记忆编函数和参数；从结果对象取值后验证不是空值；不编造结果；小改动不输出整份脚本；长对话里守住"不要动"的分析协议；不覆盖用户原始数据。
+- **R 包更新**：按 vegan 2.7（`adonis2()` 默认 `by = NULL`、取排序得分改用 `scores()`）、ggplot2 4.x（`linewidth`、`legend.position = "inside"` 等）、piecewiseSEM 2.3 更新了规范和模板。
+- **修正示例中的真实错误**：v2 的 SEM 示例用 `sem_summary$CStat` 提取 Fisher's C，元素名大小写不对，R 不报错但返回空值，导出的是空文件。v3 改用 `fisherC()`，并加了提取后的检查。
+- **风格来源**：新增 3 个公众号，按检索到的推文标题和摘要重写各账号画像，逐个标注证据强度；吸收了混合模型诊断、几类变量重要性方法的区分、SEM 与 Meta 分析扩写、批量方差分析、树模型评估与 SHAP、示例数据规范等内容。
+
+完整变更见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ## 设计理念
 
